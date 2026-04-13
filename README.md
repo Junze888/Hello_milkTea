@@ -4,6 +4,10 @@
 
 数据初版保存在浏览器 **localStorage**，与后端字段对齐；`src/api.js` 中预留了 REST 路径，后续可用 **Go** 实现高并发服务，前端只需配置环境变量切换。
 
+## 前置条件
+
+安装 **Node.js 20+**（含 `npm`）：https://nodejs.org/
+
 ## 本地开发
 
 ```bash
