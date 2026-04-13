@@ -78,6 +78,103 @@ npx --yes serve dist -p 3000
 - 发布目录：`dist`
 - 若为子路径部署，在项目设置里配置对应 `base` 或 `VITE_BASE_PATH`
 
+### 5）云服务器（拉取代码 + 构建 + Nginx）
+
+适用于在 **VPS / 云主机** 上通过 Git 拉取本仓库并对外提供静态站点。前端构建后为纯静态文件（`dist/`），无需长期运行 Node 进程；仅需在构建阶段安装 Node。
+
+**说明：** 若站点挂在 **域名根路径**（例如 `https://tea.example.com/`），构建时 **不要** 设置 `VITE_BASE_PATH`，保持默认 `/` 即可。仅当部署在子路径（如 `https://example.com/milktea/`）时，才需要设置 `VITE_BASE_PATH=/milktea/` 后再 `npm run build`。
+
+#### 5.1 服务器环境（示例：Ubuntu / Debian）
+
+```bash
+sudo apt update
+sudo apt install -y git nginx
+# Node.js 20+（任选一种安装方式，以下为 NodeSource 示例）
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+node -v && npm -v
+```
+
+#### 5.2 首次克隆与构建
+
+```bash
+sudo mkdir -p /var/www
+sudo chown -R "$USER":"$USER" /var/www
+cd /var/www
+git clone git@github.com:Junze888/Hello_milkTea.git
+cd Hello_milkTea
+npm install
+npm run build
+```
+
+构建完成后，静态资源在 **`/var/www/Hello_milkTea/dist`**。
+
+#### 5.3 Nginx 配置示例
+
+将站点根目录指向 `dist`，并适配 SPA 路由（本项目为单页，刷新时仍返回 `index.html`）：
+
+```nginx
+server {
+    listen 80;
+    server_name tea.example.com;   # 改成你的域名或 _
+
+    root /var/www/Hello_milkTea/dist;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff2?)$ {
+        expires 7d;
+        add_header Cache-Control "public, immutable";
+    }
+}
+```
+
+检查并重载：
+
+```bash
+sudo nano /etc/nginx/sites-available/hello-milktea   # 粘贴上述内容后保存
+sudo ln -sf /etc/nginx/sites-available/hello-milktea /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+如需 HTTPS，可在域名解析生效后使用 **Certbot**（`certbot --nginx`）申请证书。
+
+#### 5.4 后续更新（拉取最新代码）
+
+在项目目录执行：
+
+```bash
+cd /var/www/Hello_milkTea
+git pull
+npm install
+npm run build
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+或使用仓库内脚本（需 `chmod +x scripts/deploy-server.sh` 后执行）：
+
+```bash
+./scripts/deploy-server.sh
+```
+
+---
+
+## 首次推送到 GitHub（维护者）
+
+若远程仓库尚未创建，请先在 GitHub 网页上 **新建空仓库** `Hello_milkTea`（不要勾选初始化 README），然后在本地执行：
+
+```bash
+cd Hello_milkTea
+git remote add origin git@github.com:Junze888/Hello_milkTea.git   # 若已添加可跳过
+git branch -M main
+git push -u origin main
+```
+
+推送成功后，云服务器即可按 **「5）云服务器」** 一节克隆该地址部署。
+
 ## 许可证
 
 MIT
