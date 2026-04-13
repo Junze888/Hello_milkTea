@@ -67,10 +67,15 @@ npx --yes serve dist -p 3000
 
 ### 3）GitHub Pages
 
-1. 将仓库推送到 GitHub。
-2. 在仓库 **Settings → Pages** 中，Source 选 **GitHub Actions**（或手动上传 `dist`）。
-3. 使用本仓库可选 workflow：推送 `main` 分支时自动构建并部署（见 `.github/workflows/pages.yml`）。
-4. 若站点地址为 `https://<user>.github.io/Hello_milkTea/`，请设置 `VITE_BASE_PATH=/Hello_milkTea/` 再构建。
+本仓库已包含 workflow：`.github/workflows/pages.yml`（推送 `main` 时构建并部署）。
+
+**必须先启用 Pages，否则 Actions 里 `deploy-pages` 会报 404（`Creating Pages deployment failed`）：**
+
+1. 打开仓库 **Settings → Pages**：`https://github.com/<你的用户名>/Hello_milkTea/settings/pages`
+2. 在 **Build and deployment** 里，**Source（构建来源）** 选择 **GitHub Actions**（不要选 “Deploy from a branch”）。
+3. 保存后，再 **重新运行一次** 失败的 Workflow（Actions 里点 **Re-run all jobs**），或随便推一个空提交触发部署。
+
+说明：workflow 里已设置 `VITE_BASE_PATH=/<仓库名>/`，与项目页地址 `https://<user>.github.io/Hello_milkTea/` 一致。
 
 ### 4）Netlify / Vercel
 
