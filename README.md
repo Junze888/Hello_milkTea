@@ -1,8 +1,9 @@
 # Hello_milkTea · 奶茶点评（网页初版）
 
-精美的单页前端：登录（初版为本地昵称）、奶茶列表、五星打分、点评、排行榜（按平均分）及「打分人数」。
+精美的单页前端：登录/注册、奶茶列表、五星打分、点评、排行榜（按平均分）及「打分人数」。
 
-数据初版保存在浏览器 **localStorage**，与后端字段对齐；`src/api.js` 中预留了 REST 路径，后续可用 **Go** 实现高并发服务，前端只需配置环境变量切换。
+- **Mock 模式（默认）**：数据在浏览器 `localStorage`，昵称即可「登录」演示。
+- **对接后端**：与 **`milk_tea_go`**（`github.com/Junze888/milk_tea_go`）对齐：`JWT` + `Bearer`、列表/详情/评论/排行榜、点评需登录。Token 存 `localStorage`（`hello_milktea_auth_v2`），支持 **refresh 自动续期**。
 
 ## 前置条件
 
@@ -32,9 +33,17 @@ npm run build
 
 | 变量 | 说明 |
 |------|------|
-| `VITE_API_BASE` | 后端 API 根地址（例如 `https://api.example.com`），留空则仅走初版 mock |
-| `VITE_USE_MOCK` | 设为 `false` 且配置 `VITE_API_BASE` 后，将调用真实 API（需后端实现） |
+| `VITE_USE_MOCK` | `false` 时走真实 API；未设置或为 `true` 时为本地 mock |
+| `VITE_API_BASE` | 后端根地址（如 `https://api.example.com`）。**本地联调可留空**：`npm run dev` 时 Vite 把 `/api` 代理到 `http://127.0.0.1:8080`（见 `vite.config.js`） |
 | `VITE_BASE_PATH` | 部署到 **GitHub Pages 项目页** 时设为 `/仓库名/` |
+
+### 本地联调 milk_tea_go
+
+1. 启动后端（任选其一）：在 `milk_tea_go` 目录执行 `docker compose up -d`，或本机 `go run ./cmd/server`（需已起 PostgreSQL + Redis）。
+2. 前端 `.env`：`VITE_USE_MOCK=false`，`VITE_API_BASE` **留空**。
+3. `npm run dev`，浏览器访问 Vite 地址；请求发往同源 `/api/v1/...`，由开发服务器转发到 **8080**。
+
+生产环境静态页与 API 不同域时：构建前设置 `VITE_API_BASE=https://你的API域名`（需 HTTPS 且后端 CORS 允许该 Origin）。
 
 构建时若使用 GitHub Pages：
 
@@ -45,11 +54,11 @@ npm run build
 
 （PowerShell 可用 `$env:VITE_BASE_PATH="/Hello_milkTea/"; npm run build`）
 
-## 预留 API（后端 Go 可对齐）
+## 与 milk_tea_go 对齐的 API（节选）
 
-- `GET /api/v1/teas` — 奶茶列表（含 `ratings`）
-- `POST /api/v1/teas/:id/reviews` — 提交 `{ stars, comment }`
-- `POST /api/v1/auth/login` — 登录 `{ username, password }`
+- `POST /api/v1/auth/register` · `POST /api/v1/auth/login` · `POST /api/v1/auth/refresh` · `POST /api/v1/auth/logout`
+- `GET /api/v1/teas` · `GET /api/v1/teas/:id` · `GET /api/v1/teas/:id/reviews` · `GET /api/v1/leaderboard`
+- `POST /api/v1/teas/:id/reviews`（`Authorization: Bearer`，body：`stars`, `comment`）
 
 ## 部署方式（任选）
 

@@ -540,6 +540,49 @@ body {
   margin: 0;
 }
 
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tab {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.tab.active {
+  color: var(--cream);
+  border-color: rgba(255, 138, 92, 0.45);
+  background: rgba(255, 138, 92, 0.12);
+}
+
+.loading-hint {
+  margin: 0;
+  color: var(--muted);
+}
+
+.error-banner {
+  margin: 0;
+  color: #ff8a8a;
+}
+
+.hero code {
+  font-size: 0.9em;
+  color: var(--accent2);
+}
+
+.fatal {
+  padding: 24px;
+  color: #ff8a8a;
+}
+
 @media (max-width: 640px) {
   .top {
     flex-direction: column;
